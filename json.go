@@ -6,6 +6,16 @@ import (
 	"net/http"
 )
 
+func parseJSON(r *http.Request, v interface{}) error {
+	if r.Body == nil {
+		return http.ErrBodyNotAllowed
+	}
+	defer r.Body.Close()
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields() // Prevents unknown fields in JSON
+	return decoder.Decode(v)
+}
+
 func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	if err != nil {
 		log.Println(err)
