@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/Jasperino64/goserver/internal/auth"
 	"github.com/Jasperino64/goserver/internal/database"
 	"github.com/google/uuid"
 )
@@ -16,8 +18,23 @@ type Chirp struct {
 }
 
 func (config *apiConfig) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		http.Error(w, "Unauthorized: Invalid or missing token", http.StatusUnauthorized)
+		return
+	}
+	userId, err := auth.ValidateJWT(token, config.secretKey)
+	fmt.Printf("User ID: %s\n", userId)
+	if err != nil {
+		fmt.Printf("Failed to validate JWT: %v", err)
+		http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
+		return
+	}
+	if userId == uuid.Nil {
+		http.Error(w, "Unauthorized: Invalid user ID", http.StatusUnauthorized)
+		return
+	}
 	var req struct {
-		UserId  uuid.UUID `json:"user_id"`
 		Body    string `json:"body"`
 	}
 	if err := parseJSON(r, &req); err != nil {
@@ -29,7 +46,7 @@ func (config *apiConfig) handlerCreateChirp(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	chirp, err := config.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{
-		UserID: req.UserId,
+		UserID: userId,
 		Body:   req.Body,
 	})
 	if err != nil {

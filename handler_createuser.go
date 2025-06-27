@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -16,6 +15,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email string `json:"email"`
+	Token string `json:"token,omitempty"`
 }
 func (config *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -33,7 +33,6 @@ func (config *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("Creating user with email: %s\n", req.Email)
 	hashedPassword, err := auth.HashPassword(req.Password)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)

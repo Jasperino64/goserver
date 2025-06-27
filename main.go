@@ -16,12 +16,16 @@ type apiConfig struct {
 	fileServerHits atomic.Int32
 	dbQueries      *database.Queries
 	platform	   string
+	secretKey	   string
 }
 
 func main() {
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
 	platform := os.Getenv("PLATFORM")
+	secretKey := os.Getenv("SECRET_KEY")
+
+
 	if dbURL == "" {
 		log.Fatal("DB_URL environment variable not set")
 	}
@@ -34,12 +38,14 @@ func main() {
 	
 	const filepathRoot = "."
 	const port = "8080"
+
 	config := &apiConfig{
 		dbQueries: dbQueries,
 		platform: platform,
+		secretKey: secretKey,
 	}
+	
 	mux := http.NewServeMux()
-
 	
 	mux.Handle("/app/", http.StripPrefix("/app", config.middlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
