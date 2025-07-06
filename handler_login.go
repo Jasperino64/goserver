@@ -1,17 +1,18 @@
 package main
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
 	"github.com/Jasperino64/goserver/internal/auth"
+	"github.com/Jasperino64/goserver/internal/database"
 )
 
 func (config *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
-		ExpiresInSeconds int64 `json:"expires_in_seconds"`
 	}
 	err := parseJSON(r, &req)
 	if err != nil {
@@ -33,13 +34,28 @@ func (config *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	if req.ExpiresInSeconds <= 0 {
-		req.ExpiresInSeconds = 3600 // Default to 1 hour if not specified
-	}
-	token, err := auth.MakeJWT(user.ID, config.secretKey, time.Duration(req.ExpiresInSeconds)*time.Second)
+	token, err := auth.MakeJWT(
+		user.ID,
+		config.secretKey,
+		time.Hour,
+	)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to create JWT token", err)
+		return
+	}
+
+	refreshToken, err := auth.MakeRefreshToken()
+
+	config.dbQueries.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+		UserID: user.ID,
+		Token: refreshToken,
+		ExpiresAt: time.Now().Add(60 * 24 * time.Hour).UTC(), // refresh token valid for 60 days
+		RevokedAt: sql.NullTime{},
+	})
+	
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create refresh token", err)
 		return
 	}
 	w.Header().Set("Authorization", "Bearer " + token)
@@ -49,6 +65,7 @@ func (config *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt: user.UpdatedAt,
 		Email:    user.Email,
 		Token:  token,
+		RefreshToken: refreshToken,
 	})
 
 }

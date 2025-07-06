@@ -60,11 +60,17 @@ func main() {
 	mux.HandleFunc("POST /api/validate_chirp", handlerChirpsValidate)
 
 	mux.HandleFunc("POST /api/users", config.handlerCreateUser)
+	mux.HandleFunc("PUT /api/users", config.handlerUpdateUser)
+
 	mux.HandleFunc("POST /api/chirps", config.handlerCreateChirp)
 	mux.HandleFunc("GET /api/chirps", config.handlerGetChirps)
 	mux.HandleFunc("GET /api/chirps/{chirp_id}", config.handlerGetChirp)
+	mux.HandleFunc("DELETE /api/chirps/{chirp_id}", config.handlerDeleteChirp)
 
 	mux.HandleFunc("POST /api/login", config.handlerLogin)
+	mux.HandleFunc("POST /api/refresh", config.handlerRefresh)
+	mux.HandleFunc("POST /api/revoke", config.handlerRevoke)
+	
 
 	log.Printf("Serving on port: %s\n", port)
 	log.Fatal(srv.ListenAndServe())
