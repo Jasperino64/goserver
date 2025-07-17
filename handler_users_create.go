@@ -44,6 +44,7 @@ func (config *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 			CreatedAt: dbuser.CreatedAt,
 			UpdatedAt: dbuser.UpdatedAt,
 			Email:    dbuser.Email,
+			IsChirpyRed: dbuser.IsChirpyRed,
 		},
 	})
 }

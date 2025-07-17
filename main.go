@@ -70,7 +70,8 @@ func main() {
 	mux.HandleFunc("POST /api/login", config.handlerLogin)
 	mux.HandleFunc("POST /api/refresh", config.handlerRefresh)
 	mux.HandleFunc("POST /api/revoke", config.handlerRevoke)
-	
+
+	mux.HandleFunc("POST /api/polka/webhooks", config.handlerWebhooks)
 
 	log.Printf("Serving on port: %s\n", port)
 	log.Fatal(srv.ListenAndServe())
