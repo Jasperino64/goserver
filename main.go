@@ -17,6 +17,7 @@ type apiConfig struct {
 	dbQueries      *database.Queries
 	platform	   string
 	secretKey	   string
+	polkaKey	   string
 }
 
 func main() {
@@ -24,7 +25,10 @@ func main() {
 	dbURL := os.Getenv("DB_URL")
 	platform := os.Getenv("PLATFORM")
 	secretKey := os.Getenv("SECRET_KEY")
-
+	polkaKey := os.Getenv("POLKA_KEY")
+	if polkaKey == "" {
+		log.Fatal("POLKA_KEY environment variable not set")
+	}
 
 	if dbURL == "" {
 		log.Fatal("DB_URL environment variable not set")
@@ -43,6 +47,7 @@ func main() {
 		dbQueries: dbQueries,
 		platform: platform,
 		secretKey: secretKey,
+		polkaKey: polkaKey,
 	}
 	
 	mux := http.NewServeMux()

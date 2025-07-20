@@ -5,11 +5,21 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/Jasperino64/goserver/internal/auth"
 	"github.com/Jasperino64/goserver/internal/database"
 	"github.com/google/uuid"
 )
 
 func (config *apiConfig) handlerWebhooks(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid API key", err)
+		return
+	}
+	if apiKey != config.polkaKey {
+		respondWithError(w, http.StatusUnauthorized, "Invalid API key", errors.New("invalid API key"))
+		return
+	}
 	type upgradeRequest struct {
 		Event string `json:"event"`
 		Data  struct {

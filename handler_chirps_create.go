@@ -8,14 +8,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type Chirp struct {
-	Id     uuid.UUID `json:"id"`
-	CreatedAt string    `json:"created_at"`
-	UpdatedAt string    `json:"updated_at"`
-	UserId uuid.UUID `json:"user_id"`
-	Body   string    `json:"body"`
-}
-
 func (config *apiConfig) handlerCreateChirp(w http.ResponseWriter, r *http.Request) {
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
@@ -53,8 +45,8 @@ func (config *apiConfig) handlerCreateChirp(w http.ResponseWriter, r *http.Reque
 	
 	respondWithJSON(w, http.StatusCreated, Chirp{
 		Id:        chirp.ID,
-		CreatedAt: chirp.CreatedAt.String(),
-		UpdatedAt: chirp.UpdatedAt.String(),
+		CreatedAt: chirp.CreatedAt,
+		UpdatedAt: chirp.UpdatedAt,
 		UserId:    chirp.UserID,
 		Body:      chirp.Body,
 	})
